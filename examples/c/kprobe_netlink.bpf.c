@@ -13,7 +13,7 @@ int BPF_KPROBE(netlink_unicast, struct sock *ssk, struct sk_buff *skb, __u32 por
 	pid_t pid;
 
 	pid = bpf_get_current_pid_tgid() >> 32;
-	bpf_printk("KPROBE netlink_unicast pid = %d, portid=%08x\n", pid, portid);
+	bpf_printk("KPROBE netlink_unicast pid = %d, portid=%x\n", pid, portid);
 	return 0;
 }
 
@@ -33,7 +33,7 @@ int BPF_KPROBE(netlink_broadcast, struct sock *ssk, struct sk_buff *skb, __u32 p
 	pid_t pid;
 
 	pid = bpf_get_current_pid_tgid() >> 32;
-	bpf_printk("KPROBE netlink_broadcast pid = %d, portid=%08x\n", pid, portid);
+	bpf_printk("KPROBE netlink_broadcast pid = %d, portid=%x\n", pid, portid);
 	return 0;
 }
 
