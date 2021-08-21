@@ -81,7 +81,7 @@ function is triggered once every second:
 $ sudo ./uprobe
 libbpf: loading object 'uprobe_bpf' from buffer
 ...
-Successfully started!
+Successfully started! Please run `sudo cat /sys/kernel/debug/tracing/trace_pipe` to see output of the BPF programs.
 ...........
 ```
 
@@ -116,7 +116,7 @@ fentry and fexit programs are available starting from 5.5 kernels.
 $ sudo ./fentry
 libbpf: loading object 'fentry_bpf' from buffer
 ...
-Successfully started!
+Successfully started! Please run `sudo cat /sys/kernel/debug/tracing/trace_pipe` to see output of the BPF programs.
 ..........
 ```
 
@@ -142,7 +142,7 @@ filename, and return result, respectively, using `bpf_printk()` macro.
 $ sudo ./kprobe
 libbpf: loading object 'kprobe_bpf' from buffer
 ...
-Successfully started!
+Successfully started! Please run `sudo cat /sys/kernel/debug/tracing/trace_pipe` to see output of the BPF programs.
 ...........
 ```
 
@@ -155,6 +155,34 @@ $ sudo cat /sys/kernel/debug/tracing/trace_pipe
               rm-9346    [005] d..4  4710.951819: bpf_trace_printk: KPROBE EXIT: ret = 0
               rm-9346    [005] d..3  4710.951852: bpf_trace_printk: KPROBE ENTRY pid = 9346, filename = test2
               rm-9346    [005] d..4  4710.951895: bpf_trace_printk: KPROBE EXIT: ret = 0
+```
+
+# Kprobe_netlink
+
+`kprobe_netlink` is an example of dealing with kernel-space entry and exit (return)
+probes for [netlink](https://man7.org/linux/man-pages/man7/netlink.7.html) messages. It attaches `kprobe` and
+`kretprobe` BPF programs to the `netlink_unicast()` and `netlink_broadcast()` functions and logs the PID,
+`portid` argument, and return result, respectively, using `bpf_printk()` macro.
+
+```shell
+$ sudo ./kprobe_netlink
+libbpf: loading object 'kprobe_netlink_bpf' from buffer
+...
+Successfully started! Please run `sudo cat /sys/kernel/debug/tracing/trace_pipe` to see output of the BPF programs.
+...........
+```
+Since `netlink` messages are flowing periodically in a normal Linux system, you should see output without any action on your part. To generate output on demand, try a command which accesses routing tables such as `ip route show` from the `iproute2` package (Ubuntu).
+>**TODO**: Why are only `kretprobe` messages showing?
+
+
+The `kprobe_netlink` demo output in `/sys/kernel/debug/tracing/trace_pipe` should look something like this:
+```shell
+$           sudo-29843   [011] d... 89406.495521: bpf_trace_printk: KPROBE netlink_unicast_exit EXIT: pid = 29843, ret = 144
+
+            sudo-29843   [011] d... 89406.495803: bpf_trace_printk: KPROBE netlink_unicast_exit EXIT: pid = 29843, ret = 36
+
+            sudo-29843   [011] d... 89406.495805: bpf_trace_printk: KPROBE netlink_unicast_exit EXIT: pid = 29843, ret = 176
+
 ```
 
 # XDP
@@ -185,6 +213,12 @@ $ sudo cat /sys/kernel/debug/tracing/trace_pipe
 libbpf-bootstrap supports multiple build systems that do the same thing.
 This serves as a cross reference for folks coming from different backgrounds.
 
+## Dependencies
+
+You may need to install one or more of the following  in order to build the examples (Ubuntu procedure shown):
+```
+sudo apt install -y libelf-dev clang libzt
+```
 ## C Examples
 
 Makefile build:
