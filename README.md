@@ -172,17 +172,16 @@ Successfully started! Please run `sudo cat /sys/kernel/debug/tracing/trace_pipe`
 ...........
 ```
 Since `netlink` messages are flowing periodically in a normal Linux system, you should see output without any action on your part. To generate output on demand, try a command which accesses routing tables such as `ip route show` from the `iproute2` package (Ubuntu).
->**TODO**: Why are only `kretprobe` messages showing?
-
 
 The `kprobe_netlink` demo output in `/sys/kernel/debug/tracing/trace_pipe` should look something like this:
 ```shell
-$           sudo-29843   [011] d... 89406.495521: bpf_trace_printk: KPROBE netlink_unicast_exit EXIT: pid = 29843, ret = 144
+  NetworkManager-41810   [003] d... 143167.675387: bpf_trace_printk: KPROBE netlink_unicast pid = 913, portid=0
 
-            sudo-29843   [011] d... 89406.495803: bpf_trace_printk: KPROBE netlink_unicast_exit EXIT: pid = 29843, ret = 36
+  NetworkManager-41810   [003] d... 143167.675412: bpf_trace_printk: KPROBE netlink_unicast_exit EXIT: pid = 913, ret = 20
 
-            sudo-29843   [011] d... 89406.495805: bpf_trace_printk: KPROBE netlink_unicast_exit EXIT: pid = 29843, ret = 176
+            sudo-41811   [011] d... 143168.856687: bpf_trace_printk: KPROBE netlink_unicast pid = 41811, portid=0
 
+            sudo-41811   [011] d... 143168.856856: bpf_trace_printk: KPROBE netlink_unicast_exit EXIT: pid = 41811, ret = 20
 ```
 
 # XDP
