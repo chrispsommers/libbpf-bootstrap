@@ -175,13 +175,17 @@ Since `netlink` messages are flowing periodically in a normal Linux system, you 
 
 The `kprobe_netlink` demo output in `/sys/kernel/debug/tracing/trace_pipe` should look something like this:
 ```shell
-  NetworkManager-41810   [003] d... 143167.675387: bpf_trace_printk: KPROBE netlink_unicast pid = 913, portid=0
-
-  NetworkManager-41810   [003] d... 143167.675412: bpf_trace_printk: KPROBE netlink_unicast_exit EXIT: pid = 913, ret = 20
-
-            sudo-41811   [011] d... 143168.856687: bpf_trace_printk: KPROBE netlink_unicast pid = 41811, portid=0
-
-            sudo-41811   [011] d... 143168.856856: bpf_trace_printk: KPROBE netlink_unicast_exit EXIT: pid = 41811, ret = 20
+              ip-89179   [005] d... 408902.916372: bpf_trace_printk:                                 {pid = 0x15c5b, tid=0x15c5b, portid = 0x0}
+              ip-89179   [005] d... 408902.916374: bpf_trace_printk:    ++ NETLINK nlmsghdr: {len=40, type=18, flags=1}
+              ip-89179   [005] d... 408902.916375: bpf_trace_printk:     ++ type=18=NETLINK_SCSITRANSPORT
+              ip-89179   [005] d... 408902.916375: bpf_trace_printk:     ++ FLAGS=0x1:
+              ip-89179   [005] d... 408902.916376: bpf_trace_printk:      ++ RQST
+              ip-89179   [005] d... 408902.916391: bpf_trace_printk: > KPROBE netlink_unicast ENTER: {pid = 89179, tid=89179, portid = -716499138}
+              ip-89179   [005] d... 408902.916393: bpf_trace_printk:                                 {pid = 0x15c5b, tid=0x15c5b, portid = 0xd54b173e}
+              ip-89179   [005] d... 408902.916395: bpf_trace_printk:    ++ NETLINK nlmsghdr: {len=1372, type=16, flags=0}
+              ip-89179   [005] d... 408902.916396: bpf_trace_printk:     ++ type=16=NETLINK_GENERIC
+              ip-89179   [005] d... 408902.916399: bpf_trace_printk: < KPROBE netlink_unicast EXIT:  {pid = 89179, tid=89179, ret = 1372}
+              ip-89179   [005] d... 408902.916401: bpf_trace_printk: < KPROBE netlink_unicast EXIT:  {pid = 89179, tid=89179, ret = 40}
 ```
 
 # XDP
