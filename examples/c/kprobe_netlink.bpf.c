@@ -18,6 +18,11 @@
 
 char LICENSE[] SEC("license") = "Dual BSD/GPL";
 
+/* Note the string approach below isn't scalable, it assumes sequential message type numbers and won't work for large ranges.
+   For example, see https://github.com/linux-audit/audit-userspace/blob/master/lib/libaudit.h.
+   It has linux auditing message type enums from 1100-2999 with many gaps.
+   Since this is just a demo it's OK, advanced ecoding and printing should probably be done in userland anyhow.
+*/
 static const char netlink_msgtype[][24] = {
     "NETLINK_ROUTE",
     "NETLINK_UNUSED",
@@ -130,8 +135,6 @@ void dump_netlink(struct sock *ssk, struct sk_buff *skb, __u32 portid, int nonbl
             bpf_printk("APPEND");
         }
     }
-    // Note, there are more flag bits defined but it require more message decoding to extract context,
-    // because the bit positions are overloaded (e.g. 0x100,0x200,0x400 can have multiple meanings).
 }
 
 SEC("kprobe/netlink_unicast")
@@ -139,10 +142,8 @@ int BPF_KPROBE(netlink_unicast, struct sock *ssk, struct sk_buff *skb, __u32 por
 {
 	pid_t pid = bpf_get_current_pid_tgid() >> 32;
 	pid_t tid = bpf_get_current_pid_tgid() & 0xffffffff;
-	bpf_printk("> KPROBE netlink_unicast ENTER: {pid = %d, tid=%d, portid = %d}", pid, tid, portid);
-    // print in hex too because portid may encode pid/tid in some cases, and also may appear as negative if in decimal
-	bpf_printk("                                {pid = 0x%x, tid=0x%x, portid = 0x%x}", pid, tid, portid);
-    dump_netlink(ssk, skb, portid, nonblock);
+	bpf_printk("> KPROBE netlink_unicast ENTER: {pid = %d, tid=%d, portid = 0x%x}", pid, tid, portid);
+	dump_netlink(ssk, skb, portid, nonblock);
 	return 0;
 }
 
@@ -151,7 +152,6 @@ int BPF_KRETPROBE(netlink_unicast_exit, long ret)
 {
 	pid_t pid = bpf_get_current_pid_tgid() >> 32;
 	pid_t tid = bpf_get_current_pid_tgid() & 0xffffffff;
-    // print in hex too because portid may encode pid/tid in some cases, and also may appear as negative if in decimal
 	bpf_printk("< KPROBE netlink_unicast EXIT:  {pid = %d, tid=%d, ret = %ld}", pid, tid, ret);
 	return 0;
 }
@@ -161,8 +161,8 @@ int BPF_KPROBE(netlink_broadcast, struct sock *ssk, struct sk_buff *skb, __u32 p
 {
 	pid_t pid = bpf_get_current_pid_tgid() >> 32;
 	pid_t tid = bpf_get_current_pid_tgid() & 0xffffffff;
-	bpf_printk("> KPROBE netlink_broadcast ENTER: {pid = %d, tid=%d}", pid, tid);
-    dump_netlink(ssk, skb, portid, nonblock);
+	bpf_printk("> KPROBE netlink_unicast ENTER: {pid = %d, tid=%d, portid = 0x%x}", pid, tid, portid);
+	dump_netlink(ssk, skb, portid, nonblock);
 	return 0;
 }
 
